@@ -1,16 +1,17 @@
 import pandas as pd
 from matplotlib import pyplot as plt
-from raw_players import players_raw
 
-season_stats = pd.read_csv('data/Seasons_Stats.csv')
+total_stats = pd.read_csv('data/Seasons_Stats.csv')
 
 class Player:
-    def __init__(self, name, years):
+    def __init__(self, name, injured_years):
         self.name = name
-        if isinstance(years, list):
-            self.years = years
+        if isinstance(injured_years, list):
+            self.injured_years = injured_years
         else:
-            self.years = [].append(years)
+            self.injured_years = [].append(injured_years)
+        self.stats = total_stats.loc[total_stats['Player'] == self.name]
+        self.years_played = list(self.stats['Year'])
 
-
-player_list = [Player(name,years) for name,years in players_raw.items()]
+    def ppg(self):
+        return self.stats['PTS'].div(self.stats['G'])
