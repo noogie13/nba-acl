@@ -15,10 +15,8 @@ class Player:
         self.years_played = list(self.stats['Year'])
 
     def before_after_percentage(self,stat_fn,year,spread):
-        before = year - spread
-        after = year + spread
-        before_df = self.stats[self.stats['Year'].between(before,year-1)]
-        after_df = self.stats[self.stats['Year'].between(year+1,after)]
+        before_df = self.stats[self.stats['Year'] < year].tail(spread)
+        after_df = self.stats[self.stats['Year'] > year].head(spread)
 
         if before_df.empty or after_df.empty:
             return False
@@ -48,13 +46,14 @@ def plot_stat(player_list,stat_fn,spread):
     stat_per = [(p.injured_years[0],p.before_after_percentage(stat_fn,p.injured_years[0],spread))
                 for p in player_list]
 
-    x = [x[0] for x in stat_per if x[1] if abs(x[1] < 4)]
-    y = [x[1] for x in stat_per if x[1] if abs(x[1] < 4)]
+    x = [x[0] for x in stat_per if x[1]]
+    y = [x[1] for x in stat_per if x[1]]
 
     plt.plot(x,y)
     plt.plot(x,y,'or')
     plt.xlabel('Year')
     plt.ylabel(stat_fn.__name__ + ' % change over '+str(spread)+' yr')
+    plt.title('% change in ' + stat_fn.__name__ + ' over ' + str(spread) + ' yrs')
     z = numpy.polyfit(x, y, 1)
     p = numpy.poly1d(z)
     plt.plot(x,p(x),"r--")
