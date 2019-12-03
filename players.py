@@ -24,7 +24,7 @@ class Player:
         before_stat = stat_fn(before_df).mean()
         after_stat = stat_fn(after_df).mean()
 
-        return (abs(before_stat - after_stat) - before_stat) / before_stat
+        return (after_stat - before_stat) / before_stat
 
 
 def ppg(stats):
@@ -46,8 +46,25 @@ def plot_stat(player_list,stat_fn,spread):
     stat_per = [(p.injured_years[0],p.before_after_percentage(stat_fn,p.injured_years[0],spread))
                 for p in player_list]
 
-    x = [x[0] for x in stat_per if x[1]]
-    y = [x[1] for x in stat_per if x[1]]
+    x = [x[0] for x in stat_per if x[1] and x[1] < 2]
+    y = [x[1] for x in stat_per if x[1] and x[1] < 2]
+
+    plt.plot(x,y)
+    plt.plot(x,y,'or')
+    plt.xlabel('Year')
+    plt.ylabel(stat_fn.__name__ + ' % change over '+str(spread)+' yr')
+    plt.title('% change in ' + stat_fn.__name__ + ' over ' + str(spread) + ' yrs')
+    z = numpy.polyfit(x, y, 1)
+    p = numpy.poly1d(z)
+    plt.plot(x,p(x),"r--")
+
+
+def plot_stat_years(player_list,stat_fn,spread,year):
+    stat_per = [(p.injured_years[0],p.before_after_percentage(stat_fn,p.injured_years[0],spread))
+                for p in player_list if p.injured_years[0] > year]
+
+    x = [x[0] for x in stat_per if x[1] and x[1] < 2]
+    y = [x[1] for x in stat_per if x[1] and x[1] < 2]
 
     plt.plot(x,y)
     plt.plot(x,y,'or')
